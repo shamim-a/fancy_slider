@@ -4,6 +4,7 @@ const galleryHeader = document.querySelector('.gallery-header');
 const searchBtn = document.getElementById('search-btn');
 const sliderBtn = document.getElementById('create-slider');
 const sliderContainer = document.getElementById('sliders');
+const selectedImg = document.getElementById('selected-img');
 // selected image 
 let sliders = [];
 
@@ -26,26 +27,35 @@ const showImages = (images) => {
     div.innerHTML = ` <img class="img-fluid img-thumbnail" onclick=selectItem(event,"${image.webformatURL}") src="${image.webformatURL}" alt="${image.tags}">`;
     gallery.appendChild(div)
   })
-
+  toggleSpinner();
 }
 
 const getImages = (query) => {
+  
   fetch(`https://pixabay.com/api/?key=${KEY}=${query}&image_type=photo&pretty=true`)
     .then(response => response.json())
     .then(data => showImages(data.hits))
     .catch(err => console.log(err))
+    toggleSpinner();
+}
+
+// Show Selected Images
+const showSelectedImg = () => {
+  selectedImg.innerText = sliders.length;
 }
 
 let slideIndex = 0;
 const selectItem = (event, img) => {
   let element = event.target;
-  element.classList.add('added');
- 
+  element.classList.toggle('added');
+
   let item = sliders.indexOf(img);
   if (item === -1) {
     sliders.push(img);
+    showSelectedImg();
   } else {
-    alert('Hey, Already added !')
+    sliders.splice(item, 1);
+    showSelectedImg();
   }
 }
 var timer
@@ -121,17 +131,27 @@ const changeSlide = (index) => {
 document.getElementById('search').addEventListener('keypress',function(event){
   if(event.key=== 'Enter'){
     searchBtn.click();
+    selectedImg.innerText = 0;
   }
 });
 
+// Search Button
 searchBtn.addEventListener('click', function () {
   document.querySelector('.main').style.display = 'none';
   clearInterval(timer);
   const search = document.getElementById('search');
   getImages(search.value)
   sliders.length = 0;
+  selectedImg.innerText = 0;
 })
 
+// sippner
+const toggleSpinner = () => {
+  const spinner = document.getElementById('spinner');
+  spinner.classList.toggle('d-none');
+  imagesArea.classList.toggle('d-none');
+}
+// slider button 
 sliderBtn.addEventListener('click', function () {
   createSlider()
 })
